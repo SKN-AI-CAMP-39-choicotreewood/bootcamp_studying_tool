@@ -1,0 +1,5 @@
+.study-data/
+.runtime/
+.env
+.env.*
+node_modules/
