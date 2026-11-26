@@ -4,9 +4,15 @@
 
 ## 로컬에서 실행하기
 
-이 PC에서는 Windows에 로그인하면 서버가 백그라운드에서 시작됩니다. 브라우저에서 [Bootcamp Studying Tool 열기](http://127.0.0.1:4173/)를 선택하면 됩니다. 로컬에 설치한 Node.js 실행 파일과 앱 실행기는 프로젝트 폴더의 `.runtime`에 있습니다.
+Windows 파일 탐색기에서 프로젝트 폴더의 `start.bat`를 더블클릭하세요. 로컬 서버가 꺼져 있으면 백그라운드에서 시작하고, 서버가 준비되면 기본 브라우저에서 학습 도구를 엽니다. 다른 Windows PC에서 처음 실행할 때는 아래의 초기 설정을 먼저 진행하세요.
 
-서버를 바로 시작하고 브라우저를 열려면 파일 탐색기에서 `.runtime\Bootcamp Studying Tool.exe`를 더블클릭합니다. 자동 시작을 중지하려면 Windows에서 `shell:startup`을 열고 `Bootcamp Studying Tool` 바로가기를 제거합니다. [Windows 시작 앱 설정](https://support.microsoft.com/en-gb/windows/experience/startup-boot/configure-startup-applications-in-windows)
+Windows 로그인 시 서버가 자동으로 시작되는 PC에서는 브라우저에서 바로 접속할 수도 있습니다. [Bootcamp Studying Tool 열기](http://127.0.0.1:4173/)
+
+자동 시작을 중지하려면 Windows에서 `shell:startup`을 열고 `Bootcamp Studying Tool` 바로가기를 제거합니다. [Windows 시작 앱 설정](https://support.microsoft.com/en-gb/windows/experience/startup-boot/configure-startup-applications-in-windows)
+
+### Windows 초기 설정
+
+처음 설치하거나 자동 시작 설정을 복구하려면 PowerShell에서 프로젝트 폴더를 열고 `windows/setup.ps1`을 실행합니다. 이 스크립트는 공식 Node.js 실행 파일의 SHA-256을 확인하고 `.runtime`에 Node.js와 앱 실행기를 준비한 뒤, 현재 사용자의 자동 시작 바로가기를 설치합니다. [Node.js 공식 다운로드](https://nodejs.org/en/download)
 
 ### 개발용 터미널 실행
 
@@ -23,8 +29,6 @@ cd C:\bootcamp_studying_tool
 $env:PORT = '4174'
 .\.runtime\node.exe server.mjs
 ```
-
-자동 시작 설정을 복구하거나 다른 Windows PC에서 설정하려면 `windows/setup.ps1`을 실행합니다. 이 스크립트는 공식 Node.js 실행 파일의 SHA-256을 확인하고, 현재 사용자에게 적용되는 시작 바로가기를 설치합니다. [Node.js 공식 다운로드](https://nodejs.org/en/download)
 
 ## 커리큘럼과 수업 기록
 
