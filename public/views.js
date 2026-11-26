@@ -21,7 +21,7 @@ const link = (text, symbol, target, style = 'secondary') => `<a class="button bu
 const tile = (name, color = 'green') => `<span class="icon-tile icon-tile--${color}">${icon(name, 20)}</span>`;
 const tag = (text, type = 'neutral') => `<span class="tag tag--${type}">${text}</span>`;
 const textLink = (text, target) => `<a class="text-link" href="#${target}">${text}</a>`;
-const meter = (value, color = 'green') => `<div class="meter meter--${color}" role="progressbar" aria-label="진행률" aria-valuenow="${value}" aria-valuemin="0" aria-valuemax="100"><span style="--fill:${value}%"></span></div>`;
+const meter = (value, color = 'green', label = '진행률') => `<div class="meter meter--${color}" role="progressbar" aria-label="${esc(label)}" aria-valuenow="${value}" aria-valuemin="0" aria-valuemax="100"><span style="--fill:${value}%"></span></div>`;
 const blank = (symbol, title, text, action = '') => `<div class="blank">${tile(symbol)}<strong>${title}</strong><p>${text}</p>${action}</div>`;
 const heading = (symbol, title, description, color = 'green') => `<header class="card-heading">${tile(symbol, color)}<div><h2>${title}</h2><p>${description}</p></div></header>`;
 
@@ -98,31 +98,35 @@ function hero(state) {
   </section>`;
 }
 
-function activityChart(state, week) {
+function weeklyActivity(state, week) {
   const monday = offsetDate(state.today, -((dateObject(state.today).getUTCDay() + 6) % 7) + week * 7);
   const dates = Array.from({ length: 7 }, (_, index) => offsetDate(monday, index));
-  const byDate = dates.map((day) => {
-    const lessons = state.lessons.filter(({ date }) => date === day);
-    return { day, total: lessons.length, complete: lessons.filter(({ done }) => done).length };
-  });
-  const max = Math.max(2, ...byDate.map(({ total }) => total));
-  const top = Math.ceil(max / 2) * 2;
+  const completedDates = new Set(state.lessons.filter(({ done }) => done).map(({ date }) => date));
   return `<article class="card activity"><header class="section-head"><div><h2>주간 학습 활동</h2><p>${compactDate(dates[0])} – ${compactDate(dates[6])}</p></div><div class="week-buttons"><button class="icon-button" aria-label="이전 주" data-action="week" data-direction="-1">${icon('left', 18)}</button><button class="icon-button" aria-label="다음 주" data-action="week" data-direction="1">${icon('chevron', 18)}</button></div></header>
-    <div class="chart" aria-label="요일별 수업 일정과 완료 수"><div class="chart-axis" aria-hidden="true"><span>${top}</span><span>${top / 2}</span><span>0</span></div><div class="chart-body"><div class="chart-grid" aria-hidden="true"><i></i><i></i><i></i></div><div class="chart-bars">${byDate.map(({ day, total, complete }) => `<div class="chart-day ${day === state.today ? 'chart-day--today' : ''}" aria-label="${dateLabel(day)} 일정 ${total}개, 완료 ${complete}개" title="${dateLabel(day)} · 완료 ${complete}/${total}"><div class="chart-pair" aria-hidden="true"><i class="bar bar--planned" style="--bar:${total / top * 100}%"></i><i class="bar bar--done" style="--bar:${complete / top * 100}%"></i></div><span>${days[dateObject(day).getUTCDay()]}</span></div>`).join('')}</div></div></div>
-    <div class="legend"><span><i class="legend-planned"></i> 수업 일정</span><span><i class="legend-done"></i> 완료한 수업</span></div></article>`;
+    <ul class="activity-days" role="list" aria-label="날짜별 수업 완료 여부">${dates.map((day) => {
+      const done = completedDates.has(day);
+      const status = done ? '완료한 수업 있음' : '완료한 수업 없음';
+      return `<li class="activity-day" title="${dateLabel(day)} · ${status}">
+        <span class="activity-circle${done ? ' activity-circle--done' : ''}" role="img" aria-label="${status}">${done ? icon('check', 19) : ''}</span>
+        <time datetime="${day}"${day === state.today ? ' aria-current="date"' : ''}><span>${days[dateObject(day).getUTCDay()]}</span><small>${compactDate(day)}</small></time>
+      </li>`;
+    }).join('')}</ul></article>`;
 }
 
-function curriculumChart(state) {
-  const units = new Map();
+function subjectProgress(state) {
+  const subjects = new Map();
   for (const lesson of state.lessons) {
-    const unit = units.get(lesson.unit) ?? { total: 0, done: 0 };
-    unit.total++;
-    unit.done += Number(lesson.done);
-    units.set(lesson.unit, unit);
+    const subject = lesson.subject || (lesson.unit === '기본 커리큘럼' ? lesson.title : lesson.unit) || lesson.title;
+    const stats = subjects.get(subject) ?? { total: 0, done: 0 };
+    stats.total++;
+    stats.done += Number(lesson.done);
+    subjects.set(subject, stats);
   }
-  const palette = ['green', 'mint', 'blue', 'amber'];
-  return `<article class="card curriculum"><header class="section-head"><div><h2>단원별 진행률</h2><p>커리큘럼의 수업 완료 현황</p></div><a class="icon-button" href="#lessons" aria-label="전체 커리큘럼 보기">${icon('list', 19)}</a></header>
-  ${units.size ? `<div class="unit-list">${[...units].map(([unit, stats], index) => `<div class="unit"><div><span><i class="unit-dot unit-dot--${palette[index % 4]}"></i>${esc(unit)}</span><b>${stats.done}<small> / ${stats.total}</small></b></div>${meter(percent(stats.done, stats.total), palette[index % 4])}</div>`).join('')}</div>` : blank('book', '등록된 단원이 없습니다', '커리큘럼 CSV를 올려 수업을 추가하세요.', textLink('CSV 업로드', 'materials'))}</article>`;
+  return `<article class="card curriculum"><header class="section-head"><h2>과목별 진행률</h2><a class="icon-button" href="#lessons" aria-label="전체 커리큘럼 보기">${icon('list', 19)}</a></header>
+    ${subjects.size ? `<ul class="subject-list" role="list" aria-label="커리큘럼 과목" tabindex="0">${[...subjects].map(([subject, { done, total }]) => {
+      const value = percent(done, total);
+      return `<li class="subject"><div class="subject-heading"><span>${esc(subject)}</span><span class="subject-count">${done} / ${total}개 <strong>${value}%</strong></span></div>${meter(value, 'green', `${subject} 진행률`)}</li>`;
+    }).join('')}</ul>` : blank('book', '등록된 과목이 없습니다', '커리큘럼 CSV를 올려 수업을 추가하세요.', textLink('CSV 업로드', 'materials'))}</article>`;
 }
 
 function recentNotes(state) {
@@ -134,7 +138,7 @@ function recentNotes(state) {
 }
 
 function dashboard(state, ui) {
-  return `${pageHeading('home', link('복습 시작하기', 'spark', 'review'))}${hero(state)}${metricCards(state)}<section class="chart-grid-layout">${activityChart(state, ui.week)}${curriculumChart(state)}</section>${recentNotes(state)}`;
+  return `${pageHeading('home', link('복습 시작하기', 'spark', 'review'))}${hero(state)}${metricCards(state)}<section class="chart-grid-layout">${weeklyActivity(state, ui.week)}${subjectProgress(state)}</section>${recentNotes(state)}`;
 }
 
 function lessonsPage(state, ui) {
@@ -166,7 +170,7 @@ function curriculumCard(state) {
   return `<section class="card config-card curriculum-config" id="curriculum-upload">${heading('calendar', '커리큘럼 CSV', '수업 일정과 진도 계산에 사용할 파일을 올리세요.')}
     <form data-form="curriculum"><label class="drop"><span class="upload-icon">${icon('upload', 21)}</span><span><strong>CSV 파일 선택</strong><small data-file-label>CSV · 최대 2MB</small></span><input type="file" name="file" accept=".csv,.tsv,text/csv,text/tab-separated-values" required></label>
     <div class="config-footer">${button('커리큘럼 업로드', 'upload', 'type="submit"')}${button('CSV 양식 다운로드', 'download', 'type="button" data-action="template"', 'quiet')}</div></form>
-    ${state.curriculum ? `<div class="config-message">${icon('check', 18)} <span><strong>${esc(state.curriculum.name)}</strong> · ${state.lessons.length}개 수업</span></div>` : `<p class="field-help">필수 열은 날짜와 주제입니다. 단원과 완료 열을 함께 올릴 수 있습니다.</p>`}
+    ${state.curriculum ? `<div class="config-message">${icon('check', 18)} <span><strong>${esc(state.curriculum.name)}</strong> · ${state.lessons.length}개 수업</span></div>` : `<p class="field-help">날짜 열과 주제 또는 과목 열이 필요합니다. 단원과 완료 열도 함께 올릴 수 있습니다.</p>`}
   </section>`;
 }
 
@@ -231,7 +235,7 @@ function reviewForm(state, ui) {
     <div class="review-model"><span>${icon('key', 16)} GPT 모델</span><strong>${esc(state.model)}</strong></div>
     ${state.keySet ? button(quiz ? '문제 생성하기' : '학습 요약 생성하기', 'spark', 'type="submit"', 'primary') : `<div class="review-key">${icon('info', 18)} <span>생성하려면 OpenAI API 키를 저장하세요.</span></div>${link('API 키 설정하기', 'key', 'materials', 'primary')}`}
     ${state.demo && quiz ? button('예시 문제 풀기', 'terminal', 'type="button" data-action="sample"', 'secondary') : ''}
-    <p class="field-help">생성 시 선택한 범위의 수업 정보와 참고자료가 OpenAI API로 전송됩니다.</p></form>
+    <p class="field-help">생성 시 선택한 범위의 커리큘럼, 날짜별 수업 기록, 학습 파일이 OpenAI API로 전송됩니다.${quiz ? '' : ' 수업 기록은 핵심 개념의 이해와 복습에 도움이 되는 부분만 요약에 반영합니다.'}</p></form>
   </section>`;
 }
 

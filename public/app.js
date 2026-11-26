@@ -158,7 +158,7 @@ function downloadSummary() {
 }
 
 function makeTemplate() {
-  const rows = ['날짜,주제,단원,완료', `${state.today},변수와 자료형,JavaScript,완료`, `${state.today},배열 메서드 실습,JavaScript,`];
+  const rows = ['날짜,주제,과목,완료', `${state.today},변수와 자료형,JavaScript,완료`, `${state.today},배열 메서드 실습,JavaScript,`];
   download('bootcamp-curriculum.csv', `\uFEFF${rows.join('\r\n')}\r\n`, 'text/csv;charset=utf-8');
 }
 
