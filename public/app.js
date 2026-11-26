@@ -4,7 +4,7 @@ import { esc, noteDialog, removeDialog, routes, scopeDialog, view } from './view
 const root = document.querySelector('#app');
 const toast = document.querySelector('#toast');
 const dialog = document.querySelector('#dialog');
-const ui = { menu: false, week: 0, lessonFilter: 'all', reviewTab: 'quiz', quizKind: 'mixed', count: 5,
+const ui = { menu: false, week: 0, lessonFilter: 'all', openLessonNotes: new Set(), reviewTab: 'quiz', quizKind: 'mixed', count: 5,
   studyDate: '', question: '', drafts: {}, models: [], driveMode: '', driveScope: 'auto' };
 let state;
 let toastTimer;
@@ -18,6 +18,13 @@ function routeInfo() {
 
 function render() {
   const { route } = routeInfo();
+  if (route === 'lessons') {
+    for (const disclosure of root.querySelectorAll('[data-note-date]')) {
+      const { noteDate } = disclosure.dataset;
+      if (disclosure.open && state.notes[noteDate]) ui.openLessonNotes.add(noteDate);
+      else ui.openLessonNotes.delete(noteDate);
+    }
+  } else ui.openLessonNotes.clear();
   root.innerHTML = view(state, route, ui);
   document.title = `${routes[route].title} · Bootcamp Studying Tool`;
   lastRoute = route;

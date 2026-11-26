@@ -60,7 +60,7 @@ function shell(state, route, content, ui) {
     ${ui.menu ? `<button class="menu-scrim" aria-label="메뉴 닫기" data-action="menu"></button>` : ''}
     <div class="workspace">
       <header class="topbar">
-        <div class="crumb"><button class="icon-button mobile-menu" aria-label="메뉴 열기" aria-expanded="${ui.menu}" aria-controls="workspace-menu" data-action="menu">${icon('menu')}</button><span class="crumb-base">워크스페이스</span><span class="crumb-divider">/</span><span>${routes[route].name}</span></div>
+        <div class="topbar-page"><button class="icon-button mobile-menu" aria-label="메뉴 열기" aria-expanded="${ui.menu}" aria-controls="workspace-menu" data-action="menu">${icon('menu')}</button><span>${routes[route].name}</span></div>
         <div class="topbar-meta">${state.demo ? `<a href="#materials" class="demo-mark" title="커리큘럼 가져오기">예시 데이터</a>` : ''}<time datetime="${state.today}">${icon('calendar', 17)}<span>${dateLabel(state.today)}</span></time></div>
       </header>
       <main id="main" tabindex="-1">${content}</main>
@@ -155,8 +155,10 @@ function lessonsPage(state, ui) {
   ${rows.length ? `<div class="lesson-list">${rows.map(([date, lessons]) => {
     const note = state.notes[date];
     return `<article class="lesson-day"><time datetime="${date}"><span>${compactDate(date)}</span><small>${days[dateObject(date).getUTCDay()]}요일</small></time><div class="lesson-day-main">
-      ${lessons.map((lesson) => `<div class="lesson-item"><label class="lesson-check"><input type="checkbox" data-action="lesson" data-id="${esc(lesson.id)}" ${lesson.done ? 'checked' : ''} ${state.demo ? 'disabled' : ''}><span>${esc(lesson.title)}</span></label>${tag(esc(lesson.unit))}</div>`).join('') || '<strong>수업 기록</strong>'}
-      ${note ? `<p class="lesson-note">${esc(note)}</p>` : ''}</div><div class="lesson-actions">${date === state.today ? tag('오늘', 'green') : date > state.today ? tag('예정') : ''}${button(note ? '기록 편집' : '기록 작성', 'edit', `data-action="note" data-date="${date}"`, 'quiet')}</div></article>`;
+      ${lessons.map((lesson) => `<div class="lesson-item"><label class="lesson-check"><input type="checkbox" data-action="lesson" data-id="${esc(lesson.id)}" ${lesson.done ? 'checked' : ''} ${state.demo ? 'disabled' : ''}><span>${esc(lesson.title)}</span></label>${tag(esc(lesson.unit))}</div>`).join('')}
+      ${note ? `<details class="lesson-note-disclosure" data-note-date="${date}"${ui.openLessonNotes.has(date) ? ' open' : ''}>
+        <summary aria-label="${dateLabel(date)} 수업 기록 있음">${tag('기록 있음', 'green')}${icon('down', 16)}</summary><p class="lesson-note">${esc(note)}</p>
+      </details>` : ''}</div><div class="lesson-actions">${date === state.today ? tag('오늘', 'green') : date > state.today ? tag('예정') : ''}${button(note ? '기록 편집' : '기록 작성', 'edit', `data-action="note" data-date="${date}"`, 'quiet')}</div></article>`;
   }).join('')}</div>` : blank('calendar', '표시할 수업이 없습니다', ui.lessonFilter === 'all' ? 'CSV를 업로드하거나 날짜별 수업 기록을 추가하세요.' : '다른 필터에서 수업을 확인하세요.')}</section>`;
 }
 

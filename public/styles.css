@@ -68,10 +68,8 @@ code, pre, .code-editor { font-family: 'Cascadia Mono', 'Consolas', monospace; }
 
 .workspace { min-width: 0; }
 .topbar { min-height: var(--topbar); padding: 0 clamp(22px, 3vw, 45px); display: flex; justify-content: space-between; align-items: center; gap: 14px; border-bottom: 1px solid var(--edge); background: var(--white); }
-.crumb, .topbar-meta, .topbar time { display: flex; align-items: center; gap: 11px; }
-.crumb { font-size: .88rem; font-weight: 650; white-space: nowrap; }
-.crumb-base { color: var(--muted); font-weight: 540; }
-.crumb-divider { color: #9bad9f; }
+.topbar-page, .topbar-meta, .topbar time { display: flex; align-items: center; gap: 11px; }
+.topbar-page { font-size: .88rem; font-weight: 650; white-space: nowrap; }
 .topbar time { gap: 7px; color: var(--muted); font-size: .86rem; white-space: nowrap; }
 .demo-mark { display: inline-flex; align-items: center; color: #6d5429; background: #fcf4e4; border: 1px solid #efe0be; padding: 5px 9px; border-radius: 6px; font-size: .73rem; font-weight: 700; white-space: nowrap; }
 .demo-mark:hover { background: #f4e9d3; }
@@ -213,7 +211,11 @@ main { max-width: 1550px; margin: 0 auto; padding: 30px clamp(22px, 3vw, 45px) 4
 .lesson-check { display: inline-flex; align-items: center; gap: 8px; font-weight: 650; overflow-wrap: anywhere; }
 .lesson-check input { flex-shrink: 0; width: 17px; height: 17px; margin: 0; accent-color: var(--green); cursor: pointer; }
 .lesson-check input:disabled { cursor: inherit; }
-.lesson-note { margin-top: 7px; font-size: .88rem; color: var(--muted); white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.55; }
+.lesson-note-disclosure summary { display: flex; align-items: center; gap: 5px; width: fit-content; min-height: 34px; border-radius: 6px; color: var(--dark-green); cursor: pointer; list-style: none; }
+.lesson-note-disclosure summary::-webkit-details-marker { display: none; }
+.lesson-note-disclosure summary:hover .tag { background: #d8eadf; }
+.lesson-note-disclosure[open] summary svg { transform: rotate(180deg); }
+.lesson-note { margin-top: 4px; font-size: .88rem; color: var(--muted); white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.55; }
 .lesson-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 5px; }
 .lesson-actions .button { min-height: 34px; }
 .tag { display: inline-block; max-width: 100%; overflow-wrap: anywhere; padding: 3px 7px; border: 1px solid #e4ebe6; border-radius: 6px; color: #50685c; background: #f3f7f4; font-size: .76rem; line-height: 1.35; font-weight: 650; }
@@ -342,8 +344,7 @@ body:has(.dialog[open]) .toast { z-index: 8; }
   .navigation > a { justify-content: flex-start; width: 100%; padding: 0 12px; }
   .mobile-menu { display: inline-grid !important; }
   .topbar { padding: 0 15px; }
-  .crumb { gap: 7px; }
-  .crumb-base, .crumb-divider { display: none; }
+  .topbar-page { gap: 7px; }
   .topbar-meta { gap: 7px; }
   .topbar time { font-size: .74rem; gap: 4px; }
   .topbar time svg { display: none; }
